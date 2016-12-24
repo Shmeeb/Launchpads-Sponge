@@ -1,1 +1,1 @@
-Launchpad-Sponge
+#Launchpads for SpongePowered Servers
