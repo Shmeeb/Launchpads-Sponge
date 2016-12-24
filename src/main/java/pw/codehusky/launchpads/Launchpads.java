@@ -9,20 +9,14 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.config.DefaultConfig;
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
-import org.spongepowered.api.item.ItemTypes;
-import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.text.Text;
 
 import java.util.HashMap;
 
@@ -78,22 +72,6 @@ public class Launchpads {
             }
 
 
-        }
-    }
-    @Listener
-    public void blockPlace(ChangeBlockEvent.Place event){
-        if(event.getCause().root() instanceof Player){
-            Player cause = (Player) event.getCause().root();
-            if(cause.getItemInHand(HandTypes.MAIN_HAND).isPresent()){
-                ItemStack inhand = cause.getItemInHand(HandTypes.MAIN_HAND).get();
-                if(inhand.getItem() == ItemTypes.STONE_PRESSURE_PLATE){
-                    if(inhand.get(Keys.DISPLAY_NAME).isPresent()){
-                        if(inhand.get(Keys.DISPLAY_NAME).get().equals(Text.of("Stepper"))){
-                            event.getTransactions().get(0).getFinal().getLocation().get().sub(0,1,0).setBlock(BlockState.builder().blockType(BlockTypes.REDSTONE_LAMP).build(),genericCause);
-                        }
-                    }
-                }
-            }
         }
     }
 
