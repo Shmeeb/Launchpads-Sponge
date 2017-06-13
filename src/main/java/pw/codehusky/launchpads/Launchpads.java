@@ -64,10 +64,15 @@ public class Launchpads {
             BlockSnapshot fin = event.getTransactions().get(0).getFinal();
             BlockState bs = fin.getState();
             if(bs.getType() == BlockTypes.STONE_PRESSURE_PLATE || bs.getType() == BlockTypes.WOODEN_PRESSURE_PLATE){
-                BlockType under = fin.getLocation().get().sub(0,1,0).getBlock().getType();
+                BlockType under = fin.getLocation().get().sub(0,2,0).getBlock().getType();
                 double gg = getLaunchpadPower(under);
-                if(gg != -1)
-                    stepper.setVelocity(stepper.getVelocity().mul(gg,0,gg).add(0,gg/4,0));
+                if(gg == -1){
+                    gg = getLaunchpadPower(fin.getLocation().get().sub(0,1,0).getBlock().getType());
+                }
+                if(gg != -1) {
+                    stepper.setVelocity(stepper.getVelocity().mul(gg, 0, gg).add(0, gg / 4, 0));
+                    event.setCancelled(true);
+                }
 
             }
 
