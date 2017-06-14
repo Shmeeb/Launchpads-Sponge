@@ -3,7 +3,10 @@ package pw.codehusky.launchpads;
 import com.google.inject.Inject;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
+import org.json.JSONObject;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -17,13 +20,16 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.scheduler.Task;
 
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.function.Consumer;
 
 /**
  * Created by lokio on 12/19/2016.
  */
-@Plugin(id="launchpads", name="Launchpads", version = "1.0", description = "Launches people into the air :)")
+@Plugin(id="launchpads", name="Launchpads", version = "1.1.0", description = "Launches people into the air :)")
 public class Launchpads {
     @Inject
     private Logger logger;
@@ -40,8 +46,40 @@ public class Launchpads {
 
     @Listener
     public void gameStarted(GameStartedServerEvent event){
+        logger = LoggerFactory.getLogger(pC.getName());
         logger.info("started c:");
         genericCause = Cause.of(NamedCause.of("PluginContainer",pC));
+        Sponge.getScheduler().createTaskBuilder().async().execute(new Consumer<Task>() {
+            @Override
+            public void accept(Task task) {
+                try {
+                    JSONObject obj = pw.codehusky.launchpads.JsonReader.readJsonFromUrl("https://api.github.com/repos/codehusky/Launchpads-Sponge/releases");
+                    String[] thisVersion = pC.getVersion().get().split("\\.");
+                    String[] remoteVersion = obj.getJSONArray("releases").getJSONObject(0).getString("tag_name").replace("v","").split("\\.");
+                    for(int i = 0; i < Math.min(remoteVersion.length,thisVersion.length); i++){
+                        if(!thisVersion[i].equals(remoteVersion[i])){
+                            if(Integer.parseInt(thisVersion[i]) > Integer.parseInt(remoteVersion[i])){
+                                //we're ahead
+                                logger.warn("----------------------------------------------------");
+                                logger.warn("Running unreleased version. (Developer build?)");
+                                logger.warn("----------------------------------------------------");
+                            }else{
+                                //we're behind
+                                logger.warn("----------------------------------------------------");
+                                logger.warn("Your version of Launchpads is out of date!");
+                                logger.warn("Your version: v" + pC.getVersion().get());
+                                logger.warn("Latest version: " + obj.getJSONArray("releases").getJSONObject(0).getString("tag_name"));
+                                logger.warn("Update here: https://goo.gl/ZUTX03");
+                                logger.warn("----------------------------------------------------");
+                            }
+                            return;
+                        }
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).submit(this);
 
     }
 
